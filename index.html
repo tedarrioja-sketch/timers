@@ -15,27 +15,29 @@
         .header { width: 100%; max-width: 450px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .card { background: var(--card); padding: 20px; border-radius: 16px; width: 100%; max-width: 450px; margin-bottom: 15px; border: 1px solid var(--border); }
         
-        h3 { margin-top: 0; font-weight: 600; font-size: 14px; text-transform: uppercase; opacity: 0.7; }
+        h3 { margin-top: 0; font-weight: 600; font-size: 13px; text-transform: uppercase; opacity: 0.7; letter-spacing: 1px; }
         input { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 8px; width: 100%; font-size: 16px; margin-bottom: 10px; }
         
         .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
         .time-grid input { text-align: center; margin-bottom: 0; }
         
         .presets-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
-        .preset-btn { background: var(--border); color: var(--text); border: none; padding: 8px 12px; border-radius: 20px; font-size: 13px; cursor: pointer; }
+        .preset-tag { background: var(--border); color: var(--text); padding: 5px 10px; border-radius: 20px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+        .preset-tag span { cursor: pointer; font-weight: 600; }
+        .del-preset { color: var(--danger); font-weight: bold; cursor: pointer; padding: 2px 5px; }
         
         button { border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: transform 0.1s; }
         button:active { transform: scale(0.95); }
         .btn-main { background: var(--accent); color: white; padding: 15px; width: 100%; font-size: 16px; }
-        .btn-secondary { background: var(--border); color: var(--text); padding: 8px 12px; border-radius: 8px; font-size: 12px; }
+        .btn-secondary { background: var(--border); color: var(--text); padding: 8px 12px; font-size: 12px; }
 
         .timer-item { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border-left: 5px solid var(--accent); width: 100%; max-width: 450px; }
         .timer-item.alarm { border-left-color: var(--danger); animation: pulse 0.8s infinite; }
         .timer-clock { font-size: 48px; font-family: monospace; font-weight: 700; margin: 10px 0; text-align: center; color: var(--accent); }
         .timer-item.alarm .timer-clock { color: var(--danger); }
         
-        .controls { display: flex; gap: 10px; }
-        .stop-btn { background: var(--danger); color: white; padding: 15px; width: 100%; flex: 2; }
+        .stop-alarm-btn { background: var(--danger); color: white; padding: 15px; width: 100%; font-size: 14px; margin-top: 10px; display: none; }
+        .timer-item.alarm .stop-alarm-btn { display: block; }
         
         @keyframes pulse { 0% { background: var(--card); } 50% { background: #ff444422; } 100% { background: var(--card); } }
     </style>
@@ -48,7 +50,7 @@
     </div>
 
     <div class="card">
-        <h3>Nuevo Timer Recurrente</h3>
+        <h3>Nuevo Timer (Auto-Recurrente)</h3>
         <input type="text" id="t-name" placeholder="Nombre (ej. Serie Gym)">
         <div class="time-grid">
             <input type="number" id="t-h" placeholder="HH">
@@ -56,27 +58,25 @@
             <input type="number" id="t-s" placeholder="SS">
         </div>
         
-        <h3 style="margin-top:20px">Tus Ajustes Predefinidos</h3>
+        <h3 style="margin-top:20px">Ajustes Predefinidos</h3>
         <div id="presets-list" class="presets-container"></div>
         
         <div style="display:flex; gap:10px;">
             <button class="btn-main" onclick="startNewTimer()">INICIAR</button>
-            <button class="btn-secondary" onclick="saveAsPreset()" title="Guardar como predefinido">💾</button>
+            <button class="btn-secondary" onclick="saveAsPreset()">💾 GUARDAR</button>
         </div>
     </div>
 
     <div id="timers-list" style="width:100%; max-width:450px;"></div>
 
     <script>
-        let timers = JSON.parse(localStorage.getItem('timers_v8')) || [];
-        let presets = JSON.parse(localStorage.getItem('presets_v8')) || [
-            { name: 'Pomodoro', h: 0, m: 25, s: 0 },
-            { name: 'Descanso', h: 0, m: 5, s: 0 }
+        let timers = JSON.parse(localStorage.getItem('timers_v9')) || [];
+        let presets = JSON.parse(localStorage.getItem('presets_v9')) || [
+            { name: 'Pomodoro', h: 0, m: 25, s: 0 }
         ];
         
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        // TEMA
         function toggleTheme() {
             const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
             document.body.setAttribute('data-theme', t);
@@ -89,31 +89,36 @@
         function renderPresets() {
             const container = document.getElementById('presets-list');
             container.innerHTML = presets.map((p, i) => `
-                <button class="preset-btn" onclick="applyPreset(${i})">${p.name} (${p.m}m)</button>
+                <div class="preset-tag">
+                    <span onclick="applyPreset(${i})">${p.name}</span>
+                    <div class="del-preset" onclick="deletePreset(${i})">×</div>
+                </div>
             `).join('');
         }
 
-        function applyPreset(index) {
-            const p = presets[index];
+        function applyPreset(i) {
+            const p = presets[i];
             document.getElementById('t-name').value = p.name;
-            document.getElementById('t-h').value = p.h;
-            document.getElementById('t-m').value = p.m;
-            document.getElementById('t-s').value = p.s;
+            document.getElementById('t-h').value = p.h; document.getElementById('t-m').value = p.m; document.getElementById('t-s').value = p.s;
+        }
+
+        function deletePreset(i) {
+            presets.splice(i, 1);
+            localStorage.setItem('presets_v9', JSON.stringify(presets));
+            renderPresets();
         }
 
         function saveAsPreset() {
             const name = document.getElementById('t-name').value || "Preset";
-            const h = parseInt(document.getElementById('t-h').value || 0);
-            const m = parseInt(document.getElementById('t-m').value || 0);
-            const s = parseInt(document.getElementById('t-s').value || 0);
+            const h = parseInt(document.getElementById('t-h').value || 0), m = parseInt(document.getElementById('t-m').value || 0), s = parseInt(document.getElementById('t-s').value || 0);
             if(h+m+s > 0) {
                 presets.push({ name, h, m, s });
-                localStorage.setItem('presets_v8', JSON.stringify(presets));
+                localStorage.setItem('presets_v9', JSON.stringify(presets));
                 renderPresets();
             }
         }
 
-        // LÓGICA TIMER
+        // LÓGICA
         function startNewTimer() {
             const name = document.getElementById('t-name').value || "Timer";
             const h = parseInt(document.getElementById('t-h').value || 0), m = parseInt(document.getElementById('t-m').value || 0), s = parseInt(document.getElementById('t-s').value || 0);
@@ -124,31 +129,26 @@
             }
         }
 
-        function saveAndRender() {
-            localStorage.setItem('timers_v8', JSON.stringify(timers));
-            renderTimers();
-        }
-
-        function playBeep() {
+        function playSound() {
             if(audioCtx.state === 'suspended') audioCtx.resume();
             const o = audioCtx.createOscillator(), g = audioCtx.createGain();
             o.connect(g); g.connect(audioCtx.destination);
             o.type = 'square'; o.frequency.setValueAtTime(880, audioCtx.currentTime);
             g.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            o.start(); o.stop(audioCtx.currentTime + 0.15);
+            o.start(); o.stop(audioCtx.currentTime + 0.1);
         }
 
         function update() {
             const now = Date.now();
             let alarm = false;
             timers.forEach(t => {
-                if (t.running && !t.isAlarming) {
+                if (t.running) {
                     const d = Math.floor((now - t.lastUpdate) / 1000);
                     if (d >= 1) {
                         t.remaining -= d;
                         t.lastUpdate = now;
                         if (t.remaining <= 0) {
-                            t.remaining = t.total; // RECURRENCIA AUTOMÁTICA
+                            t.remaining = t.total; // REANUDACIÓN AUTOMÁTICA INSTANTÁNEA
                             t.isAlarming = true;
                         }
                         saveAndRender();
@@ -156,17 +156,22 @@
                 }
                 if (t.isAlarming) alarm = true;
             });
-            if (alarm) playBeep();
+            if (alarm) playSound();
         }
 
-        function stopTimer(id) {
+        function stopAlarm(id) {
             const t = timers.find(x => x.id === id);
-            if(t) { t.isAlarming = false; t.running = false; saveAndRender(); }
+            if(t) { t.isAlarming = false; saveAndRender(); }
         }
 
         function removeTimer(id) {
             timers = timers.filter(x => x.id !== id);
             saveAndRender();
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('timers_v9', JSON.stringify(timers));
+            renderTimers();
         }
 
         function format(s) {
@@ -177,24 +182,14 @@
         function renderTimers() {
             document.getElementById('timers-list').innerHTML = timers.map(t => `
                 <div class="timer-item ${t.isAlarming?'alarm':''}">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; justify-content:space-between;">
                         <strong>${t.name}</strong>
-                        <button onclick="removeTimer(${t.id})" style="background:none; color:var(--danger); font-size:18px;">✕</button>
+                        <span onclick="removeTimer(${t.id})" style="color:var(--danger); cursor:pointer;">✕ ELIMINAR</span>
                     </div>
                     <div class="timer-clock">${format(t.remaining)}</div>
-                    <div class="controls">
-                        ${t.isAlarming ? 
-                            `<button class="stop-btn" onclick="stopTimer(${t.id})">DETENER ALARMA</button>` : 
-                            `<button style="width:100%; padding:12px; background:var(--border); color:var(--text);" onclick="togglePause(${t.id})">${t.running?'PAUSAR':'REANUDAR'}</button>`
-                        }
-                    </div>
+                    <button class="stop-alarm-btn" onclick="stopAlarm(${t.id})">SILENCIAR ALARMA</button>
                 </div>
             `).join('');
-        }
-
-        function togglePause(id) {
-            const t = timers.find(x => x.id === id);
-            if(t) { t.running = !t.running; t.lastUpdate = Date.now(); saveAndRender(); }
         }
 
         setInterval(update, 1000);
