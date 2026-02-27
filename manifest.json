@@ -1,21 +1,31 @@
 {
   "name": "PowerTimer Pro",
   "short_name": "PowerTimer",
-  "id": "com.powertimer.v9",
-  "start_url": "index.html",
+  "id": "/powertimer-pro-v11/",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0d0d0d",
   "theme_color": "#007bff",
+  "orientation": "portrait",
+  "scope": "./",
   "icons": [
     {
       "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAAAnPZ9fAAAACXBIWXMAAAsTAAALEwEAmpwYAAABJklEQVR4nO3bS0oDQRRF0Sp9mY6MxInmZByIGzByXf6m8SNoAnUEnAtOatX9oF666p5H2XIsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADA96pa7S6An+XatXvL7m67u+68G4Cfy0U8A3ARzwBcxDMAF/EMwEU8A3ARzwBcxDMAF/EMwEU8A3ARzwBcxDMAF/EMwEU8A3ARzwBcxDMAF/EMwEU8A3ARzwBcxDMAF/EMwEU8A3ARzwBcxDMAF/EMwEU8A3ARzwBcxDMAF/EMwEU8A3ARzwBcxDMAF/EMwEU8A3ARzwBcxDMAF/EMwEU8A3ARzwBcxDMAF/EMwEU8A3ARzwBcxDMAF/EMwEU8A3ARzwBcxDMAF/EMwEU8A3ARzwBcxDMAF/EMwEX8U9fF7pL4U7777T4CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC+6w2fshYV6UAtiwAAAABJRU5ErkJggg==",
       "sizes": "96x96",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAACXBIWXMAAAsTAAALEwEAmpwYAAABXElEQVR4nO3bS0pDQRRF0SptmV6MREdiN467EdyDsfvyd40DQRMoI+BceFKrrgf10lX7TsmSygAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADA96q6rS6An+Xat67XF8DP5SKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4p+6ruquid/lu9/uLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAfNcHVs8WFRvU0dEAAAAASUVORK5CYII=",
       "sizes": "128x128",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAYAAACLz2ctAAAACXBIWXMAAAsTAAALEwEAmpwYAAABXElEQVR4nO3bS0pDQRRF0SptmV6MREdiN467EdyDsfvyd40DQRMoI+BceFKrrgf10lX7TsmSygAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADA96q6rS6An+Xat67XF8DP5SKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4hmQi3gG5CKeAbmIZ0Au4p+6ruquid/lu9/uLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAfNcHVs8WFRvU0dEAAAAASUVORK5CYII=",
+      "sizes": "160x160",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
