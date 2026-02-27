@@ -1,7 +1,7 @@
 {
   "name": "PowerTimer Pro",
   "short_name": "PowerTimer",
-  "id": "com.powertimer.v8",
+  "id": "com.powertimer.v9",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#0d0d0d",
