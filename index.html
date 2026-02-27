@@ -7,178 +7,200 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" id="theme-meta" content="#0d0d0d">
     <style>
-        :root {
-            --bg: #ffffff; --card: #f2f2f2; --text: #1a1a1a;
-            --accent: #007bff; --danger: #ff4444; --success: #00c851; --border: #dddddd;
-        }
-        [data-theme="dark"] {
-            --bg: #0d0d0d; --card: #1a1a1a; --text: #e0e0e0; --border: #333333;
-        }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; transition: background 0.3s, color 0.3s; }
-        body { 
-            font-family: system-ui, -apple-system, sans-serif; background: var(--bg); 
-            color: var(--text); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center;
-        }
+        :root { --bg: #ffffff; --card: #f2f2f2; --text: #1a1a1a; --accent: #007bff; --danger: #ff4444; --border: #dddddd; }
+        [data-theme="dark"] { --bg: #0d0d0d; --card: #1a1a1a; --text: #e0e0e0; --border: #333333; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: system-ui, sans-serif; }
+        body { background: var(--bg); color: var(--text); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        
         .header { width: 100%; max-width: 450px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .setup-card {
-            background: var(--card); padding: 20px; border-radius: 16px;
-            width: 100%; max-width: 450px; margin-bottom: 20px; border: 1px solid var(--border);
-        }
-        .input-group { display: flex; flex-direction: column; gap: 10px; }
-        input {
-            background: var(--bg); border: 1px solid var(--border); color: var(--text);
-            padding: 12px; border-radius: 8px; font-size: 16px; width: 100%;
-        }
-        .time-inputs { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
-        .time-inputs input { width: 70px; text-align: center; font-size: 18px; }
+        .card { background: var(--card); padding: 20px; border-radius: 16px; width: 100%; max-width: 450px; margin-bottom: 15px; border: 1px solid var(--border); }
         
-        button { border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
-        .btn-main { background: var(--accent); color: white; padding: 15px; width: 100%; margin-top: 15px; font-size: 16px; }
-        .btn-theme { background: var(--card); color: var(--text); padding: 8px 12px; border: 1px solid var(--border); }
-        .btn-action { background: var(--border); color: var(--text); padding: 10px; flex: 1; }
+        h3 { margin-top: 0; font-weight: 600; font-size: 14px; text-transform: uppercase; opacity: 0.7; }
+        input { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 8px; width: 100%; font-size: 16px; margin-bottom: 10px; }
         
-        #timers-list { width: 100%; max-width: 450px; }
-        .timer-item {
-            background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px;
-            border-left: 5px solid var(--accent); animation: slideIn 0.3s ease;
-        }
-        .timer-item.alarm { border-left-color: var(--danger); animation: alarm-pulse 0.5s infinite; }
-        .timer-header { display: flex; justify-content: space-between; align-items: center; }
-        .timer-clock { font-size: 42px; font-family: monospace; font-weight: 700; margin: 10px 0; text-align: center; }
-        .stop-btn { background: var(--danger); color: white; padding: 15px; width: 100%; font-size: 16px; }
+        .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
+        .time-grid input { text-align: center; margin-bottom: 0; }
+        
+        .presets-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+        .preset-btn { background: var(--border); color: var(--text); border: none; padding: 8px 12px; border-radius: 20px; font-size: 13px; cursor: pointer; }
+        
+        button { border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: transform 0.1s; }
+        button:active { transform: scale(0.95); }
+        .btn-main { background: var(--accent); color: white; padding: 15px; width: 100%; font-size: 16px; }
+        .btn-secondary { background: var(--border); color: var(--text); padding: 8px 12px; border-radius: 8px; font-size: 12px; }
 
-        @keyframes alarm-pulse { 0% { background: var(--card); } 50% { background: #ff444433; } 100% { background: var(--card); } }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .timer-item { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border-left: 5px solid var(--accent); width: 100%; max-width: 450px; }
+        .timer-item.alarm { border-left-color: var(--danger); animation: pulse 0.8s infinite; }
+        .timer-clock { font-size: 48px; font-family: monospace; font-weight: 700; margin: 10px 0; text-align: center; color: var(--accent); }
+        .timer-item.alarm .timer-clock { color: var(--danger); }
+        
+        .controls { display: flex; gap: 10px; }
+        .stop-btn { background: var(--danger); color: white; padding: 15px; width: 100%; flex: 2; }
+        
+        @keyframes pulse { 0% { background: var(--card); } 50% { background: #ff444422; } 100% { background: var(--card); } }
     </style>
 </head>
 <body data-theme="dark">
 
     <div class="header">
-        <h2 style="margin:0">PowerTimer</h2>
-        <button class="btn-theme" onclick="toggleTheme()" id="theme-btn">☀️ Claro</button>
+        <h2 style="margin:0">PowerTimer Pro</h2>
+        <button class="btn-secondary" onclick="toggleTheme()" id="theme-btn">☀️ CLARO</button>
     </div>
 
-    <div class="setup-card">
-        <div class="input-group">
-            <input type="text" id="t-name" placeholder="Nombre del timer (ej. Ejercicio)">
-            <div class="time-inputs">
-                <input type="number" id="t-h" placeholder="HH" min="0">
-                <input type="number" id="t-m" placeholder="MM" min="0" max="59">
-                <input type="number" id="t-s" placeholder="SS" min="0" max="59">
-            </div>
+    <div class="card">
+        <h3>Nuevo Timer Recurrente</h3>
+        <input type="text" id="t-name" placeholder="Nombre (ej. Serie Gym)">
+        <div class="time-grid">
+            <input type="number" id="t-h" placeholder="HH">
+            <input type="number" id="t-m" placeholder="MM">
+            <input type="number" id="t-s" placeholder="SS">
         </div>
-        <button class="btn-main" onclick="createNewTimer()">INICIAR RECURRENTE</button>
+        
+        <h3 style="margin-top:20px">Tus Ajustes Predefinidos</h3>
+        <div id="presets-list" class="presets-container"></div>
+        
+        <div style="display:flex; gap:10px;">
+            <button class="btn-main" onclick="startNewTimer()">INICIAR</button>
+            <button class="btn-secondary" onclick="saveAsPreset()" title="Guardar como predefinido">💾</button>
+        </div>
     </div>
 
-    <div id="timers-list"></div>
+    <div id="timers-list" style="width:100%; max-width:450px;"></div>
 
     <script>
-        let timers = JSON.parse(localStorage.getItem('pwa_timers_v6')) || [];
+        let timers = JSON.parse(localStorage.getItem('timers_v8')) || [];
+        let presets = JSON.parse(localStorage.getItem('presets_v8')) || [
+            { name: 'Pomodoro', h: 0, m: 25, s: 0 },
+            { name: 'Descanso', h: 0, m: 5, s: 0 }
+        ];
+        
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         // TEMA
         function toggleTheme() {
-            const current = document.body.getAttribute('data-theme');
-            setTheme(current === 'dark' ? 'light' : 'dark');
+            const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', t);
+            document.getElementById('theme-btn').innerText = t === 'dark' ? '☀️ CLARO' : '🌙 OSCURO';
+            localStorage.setItem('theme', t);
         }
-        function setTheme(theme) {
-            document.body.setAttribute('data-theme', theme);
-            document.getElementById('theme-btn').innerText = theme === 'dark' ? '☀️ Claro' : '🌙 Oscuro';
-            localStorage.setItem('pwa_theme', theme);
-            document.getElementById('theme-meta').setAttribute('content', theme === 'dark' ? '#0d0d0d' : '#ffffff');
+        if(localStorage.getItem('theme')) document.body.setAttribute('data-theme', localStorage.getItem('theme'));
+
+        // PRESETS
+        function renderPresets() {
+            const container = document.getElementById('presets-list');
+            container.innerHTML = presets.map((p, i) => `
+                <button class="preset-btn" onclick="applyPreset(${i})">${p.name} (${p.m}m)</button>
+            `).join('');
         }
-        setTheme(localStorage.getItem('pwa_theme') || 'dark');
 
-        // LOGICA
-        function save() { localStorage.setItem('pwa_timers_v6', JSON.stringify(timers)); }
+        function applyPreset(index) {
+            const p = presets[index];
+            document.getElementById('t-name').value = p.name;
+            document.getElementById('t-h').value = p.h;
+            document.getElementById('t-m').value = p.m;
+            document.getElementById('t-s').value = p.s;
+        }
 
-        function createNewTimer() {
-            const name = document.getElementById('t-name').value || "Timer";
+        function saveAsPreset() {
+            const name = document.getElementById('t-name').value || "Preset";
             const h = parseInt(document.getElementById('t-h').value || 0);
             const m = parseInt(document.getElementById('t-m').value || 0);
             const s = parseInt(document.getElementById('t-s').value || 0);
-            const total = (h * 3600) + (m * 60) + s;
-            if(total > 0) {
-                timers.push({ id: Date.now(), name, total, remaining: total, running: true, lastUpdate: Date.now(), isAlarming: false });
-                save(); render();
-                document.querySelectorAll('input').forEach(i => i.value = '');
+            if(h+m+s > 0) {
+                presets.push({ name, h, m, s });
+                localStorage.setItem('presets_v8', JSON.stringify(presets));
+                renderPresets();
             }
         }
 
-        function playSound() {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const o = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
+        // LÓGICA TIMER
+        function startNewTimer() {
+            const name = document.getElementById('t-name').value || "Timer";
+            const h = parseInt(document.getElementById('t-h').value || 0), m = parseInt(document.getElementById('t-m').value || 0), s = parseInt(document.getElementById('t-s').value || 0);
+            const total = (h * 3600) + (m * 60) + s;
+            if(total > 0) {
+                timers.push({ id: Date.now(), name, total, remaining: total, running: true, lastUpdate: Date.now(), isAlarming: false });
+                saveAndRender();
+            }
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('timers_v8', JSON.stringify(timers));
+            renderTimers();
+        }
+
+        function playBeep() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const o = audioCtx.createOscillator(), g = audioCtx.createGain();
             o.connect(g); g.connect(audioCtx.destination);
             o.type = 'square'; o.frequency.setValueAtTime(880, audioCtx.currentTime);
-            g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            g.gain.setValueAtTime(0.05, audioCtx.currentTime);
             o.start(); o.stop(audioCtx.currentTime + 0.15);
         }
 
         function update() {
             const now = Date.now();
-            let changed = false;
-            let alarmActive = false;
-
+            let alarm = false;
             timers.forEach(t => {
                 if (t.running && !t.isAlarming) {
-                    const delta = Math.floor((now - t.lastUpdate) / 1000);
-                    if (delta >= 1) {
-                        t.remaining -= delta;
+                    const d = Math.floor((now - t.lastUpdate) / 1000);
+                    if (d >= 1) {
+                        t.remaining -= d;
                         t.lastUpdate = now;
                         if (t.remaining <= 0) {
-                            t.remaining = t.total; // Reinicio automático
+                            t.remaining = t.total; // RECURRENCIA AUTOMÁTICA
                             t.isAlarming = true;
                         }
-                        changed = true;
+                        saveAndRender();
                     }
                 }
-                if (t.isAlarming) alarmActive = true;
+                if (t.isAlarming) alarm = true;
             });
-
-            if (changed) { save(); render(); }
-            if (alarmActive) playSound();
+            if (alarm) playBeep();
         }
 
-        function stopAlarm(id) {
-            const t = timers.find(t => t.id === id);
-            if (t) { t.isAlarming = false; t.running = false; save(); render(); }
+        function stopTimer(id) {
+            const t = timers.find(x => x.id === id);
+            if(t) { t.isAlarming = false; t.running = false; saveAndRender(); }
         }
 
-        function toggleTimer(id) {
-            const t = timers.find(t => t.id === id);
-            if (t) { t.running = !t.running; t.lastUpdate = Date.now(); save(); render(); }
+        function removeTimer(id) {
+            timers = timers.filter(x => x.id !== id);
+            saveAndRender();
         }
-
-        function remove(id) { timers = timers.filter(t => t.id !== id); save(); render(); }
 
         function format(s) {
-            const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
-            return `${h>0?h+':':''}${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+            const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sc = s%60;
+            return `${h>0?h+':':''}${m.toString().padStart(2,'0')}:${sc.toString().padStart(2,'0')}`;
         }
 
-        function render() {
-            const container = document.getElementById('timers-list');
-            container.innerHTML = timers.map(t => `
-                <div class="timer-item ${t.isAlarming ? 'alarm' : ''}">
-                    <div class="timer-header">
+        function renderTimers() {
+            document.getElementById('timers-list').innerHTML = timers.map(t => `
+                <div class="timer-item ${t.isAlarming?'alarm':''}">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
                         <strong>${t.name}</strong>
-                        <button onclick="remove(${t.id})" style="background:none;color:var(--danger);font-size:20px">✕</button>
+                        <button onclick="removeTimer(${t.id})" style="background:none; color:var(--danger); font-size:18px;">✕</button>
                     </div>
                     <div class="timer-clock">${format(t.remaining)}</div>
-                    <div style="display:flex; gap:10px">
+                    <div class="controls">
                         ${t.isAlarming ? 
-                            `<button class="stop-btn" onclick="stopAlarm(${t.id})">DETENER ALARMA</button>` :
-                            `<button class="btn-action" onclick="toggleTimer(${t.id})">${t.running ? 'PAUSAR' : 'REANUDAR'}</button>`
+                            `<button class="stop-btn" onclick="stopTimer(${t.id})">DETENER ALARMA</button>` : 
+                            `<button style="width:100%; padding:12px; background:var(--border); color:var(--text);" onclick="togglePause(${t.id})">${t.running?'PAUSAR':'REANUDAR'}</button>`
                         }
                     </div>
                 </div>
             `).join('');
         }
 
+        function togglePause(id) {
+            const t = timers.find(x => x.id === id);
+            if(t) { t.running = !t.running; t.lastUpdate = Date.now(); saveAndRender(); }
+        }
+
         setInterval(update, 1000);
+        renderPresets();
+        renderTimers();
         if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
-        render();
     </script>
 </body>
 </html>
