@@ -1,4 +1,4 @@
-const CACHE_NAME = 'timers-v4';
+const CACHE_NAME = 'powertimer-v6';
 const ASSETS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
