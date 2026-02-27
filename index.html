@@ -1,19 +1,96 @@
-let timers = JSON.parse(localStorage.getItem('pwa_timers_v5')) || [];
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PowerTimer Pro</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" id="theme-meta" content="#0d0d0d">
+    <style>
+        :root {
+            --bg: #ffffff; --card: #f2f2f2; --text: #1a1a1a;
+            --accent: #007bff; --danger: #ff4444; --success: #00c851; --border: #dddddd;
+        }
+        [data-theme="dark"] {
+            --bg: #0d0d0d; --card: #1a1a1a; --text: #e0e0e0; --border: #333333;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; transition: background 0.3s, color 0.3s; }
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; background: var(--bg); 
+            color: var(--text); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center;
+        }
+        .header { width: 100%; max-width: 450px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .setup-card {
+            background: var(--card); padding: 20px; border-radius: 16px;
+            width: 100%; max-width: 450px; margin-bottom: 20px; border: 1px solid var(--border);
+        }
+        .input-group { display: flex; flex-direction: column; gap: 10px; }
+        input {
+            background: var(--bg); border: 1px solid var(--border); color: var(--text);
+            padding: 12px; border-radius: 8px; font-size: 16px; width: 100%;
+        }
+        .time-inputs { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
+        .time-inputs input { width: 70px; text-align: center; font-size: 18px; }
         
+        button { border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .btn-main { background: var(--accent); color: white; padding: 15px; width: 100%; margin-top: 15px; font-size: 16px; }
+        .btn-theme { background: var(--card); color: var(--text); padding: 8px 12px; border: 1px solid var(--border); }
+        .btn-action { background: var(--border); color: var(--text); padding: 10px; flex: 1; }
+        
+        #timers-list { width: 100%; max-width: 450px; }
+        .timer-item {
+            background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px;
+            border-left: 5px solid var(--accent); animation: slideIn 0.3s ease;
+        }
+        .timer-item.alarm { border-left-color: var(--danger); animation: alarm-pulse 0.5s infinite; }
+        .timer-header { display: flex; justify-content: space-between; align-items: center; }
+        .timer-clock { font-size: 42px; font-family: monospace; font-weight: 700; margin: 10px 0; text-align: center; }
+        .stop-btn { background: var(--danger); color: white; padding: 15px; width: 100%; font-size: 16px; }
+
+        @keyframes alarm-pulse { 0% { background: var(--card); } 50% { background: #ff444433; } 100% { background: var(--card); } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div class="header">
+        <h2 style="margin:0">PowerTimer</h2>
+        <button class="btn-theme" onclick="toggleTheme()" id="theme-btn">☀️ Claro</button>
+    </div>
+
+    <div class="setup-card">
+        <div class="input-group">
+            <input type="text" id="t-name" placeholder="Nombre del timer (ej. Ejercicio)">
+            <div class="time-inputs">
+                <input type="number" id="t-h" placeholder="HH" min="0">
+                <input type="number" id="t-m" placeholder="MM" min="0" max="59">
+                <input type="number" id="t-s" placeholder="SS" min="0" max="59">
+            </div>
+        </div>
+        <button class="btn-main" onclick="createNewTimer()">INICIAR RECURRENTE</button>
+    </div>
+
+    <div id="timers-list"></div>
+
+    <script>
+        let timers = JSON.parse(localStorage.getItem('pwa_timers_v6')) || [];
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // TEMA
         function toggleTheme() {
             const current = document.body.getAttribute('data-theme');
             setTheme(current === 'dark' ? 'light' : 'dark');
         }
         function setTheme(theme) {
             document.body.setAttribute('data-theme', theme);
-            document.getElementById('theme-toggle').innerText = theme === 'dark' ? '☀️ Modo Claro' : '🌙 Modo Oscuro';
+            document.getElementById('theme-btn').innerText = theme === 'dark' ? '☀️ Claro' : '🌙 Oscuro';
             localStorage.setItem('pwa_theme', theme);
             document.getElementById('theme-meta').setAttribute('content', theme === 'dark' ? '#0d0d0d' : '#ffffff');
         }
         setTheme(localStorage.getItem('pwa_theme') || 'dark');
 
-        function save() { localStorage.setItem('pwa_timers_v5', JSON.stringify(timers)); }
+        // LOGICA
+        function save() { localStorage.setItem('pwa_timers_v6', JSON.stringify(timers)); }
 
         function createNewTimer() {
             const name = document.getElementById('t-name').value || "Timer";
@@ -21,41 +98,27 @@ let timers = JSON.parse(localStorage.getItem('pwa_timers_v5')) || [];
             const m = parseInt(document.getElementById('t-m').value || 0);
             const s = parseInt(document.getElementById('t-s').value || 0);
             const total = (h * 3600) + (m * 60) + s;
-            if(total > 0) addTimer(total, name);
-        }
-
-        function quickTimer(sec, name) { addTimer(sec, name); }
-
-        function addTimer(seconds, name) {
-            timers.push({ 
-                id: Date.now(), 
-                name: name, 
-                total: seconds, 
-                remaining: seconds, 
-                running: true, 
-                lastUpdate: Date.now(), 
-                isAlarming: false 
-            });
-            save(); render();
-            document.querySelectorAll('.input-group input').forEach(i => i.value = '');
+            if(total > 0) {
+                timers.push({ id: Date.now(), name, total, remaining: total, running: true, lastUpdate: Date.now(), isAlarming: false });
+                save(); render();
+                document.querySelectorAll('input').forEach(i => i.value = '');
+            }
         }
 
         function playSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             const o = audioCtx.createOscillator();
             const g = audioCtx.createGain();
             o.connect(g); g.connect(audioCtx.destination);
-            o.type = 'sine';
-            o.frequency.setValueAtTime(587.33, audioCtx.currentTime); // Nota Re5
-            o.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
-            g.gain.setValueAtTime(0.2, audioCtx.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-            o.start(); o.stop(audioCtx.currentTime + 0.3);
+            o.type = 'square'; o.frequency.setValueAtTime(880, audioCtx.currentTime);
+            g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            o.start(); o.stop(audioCtx.currentTime + 0.15);
         }
 
         function update() {
             const now = Date.now();
             let changed = false;
-            let activeAlarms = false;
+            let alarmActive = false;
 
             timers.forEach(t => {
                 if (t.running && !t.isAlarming) {
@@ -63,53 +126,31 @@ let timers = JSON.parse(localStorage.getItem('pwa_timers_v5')) || [];
                     if (delta >= 1) {
                         t.remaining -= delta;
                         t.lastUpdate = now;
-                        
                         if (t.remaining <= 0) {
-                            t.remaining = t.total; // RECURSIVIDAD: Reinicia el tiempo
-                            t.isAlarming = true;   // Activa modo alarma
-                            notify(t.name);
+                            t.remaining = t.total; // Reinicio automático
+                            t.isAlarming = true;
                         }
                         changed = true;
                     }
                 }
-                if (t.isAlarming) activeAlarms = true;
+                if (t.isAlarming) alarmActive = true;
             });
 
             if (changed) { save(); render(); }
-            if (activeAlarms) playSound();
+            if (alarmActive) playSound();
         }
 
-        function notify(name) {
-            if (Notification.permission === "granted") {
-                new Notification("¡Timer Recurrente!", { 
-                    body: `El ciclo de "${name}" ha terminado. Sigue activo.`,
-                    icon: "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%23ff4444%22/></svg>"
-                });
-            }
-        }
-
-        function stopAndPause(id) {
+        function stopAlarm(id) {
             const t = timers.find(t => t.id === id);
-            if (t) {
-                t.isAlarming = false;
-                t.running = false; // Detiene el timer completamente
-                save(); render();
-            }
+            if (t) { t.isAlarming = false; t.running = false; save(); render(); }
         }
 
-        function toggleResume(id) {
+        function toggleTimer(id) {
             const t = timers.find(t => t.id === id);
-            if (t) {
-                t.running = !t.running;
-                t.lastUpdate = Date.now();
-                save(); render();
-            }
+            if (t) { t.running = !t.running; t.lastUpdate = Date.now(); save(); render(); }
         }
 
-        function remove(id) {
-            timers = timers.filter(t => t.id !== id);
-            save(); render();
-        }
+        function remove(id) { timers = timers.filter(t => t.id !== id); save(); render(); }
 
         function format(s) {
             const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
@@ -125,12 +166,10 @@ let timers = JSON.parse(localStorage.getItem('pwa_timers_v5')) || [];
                         <button onclick="remove(${t.id})" style="background:none;color:var(--danger);font-size:20px">✕</button>
                     </div>
                     <div class="timer-clock">${format(t.remaining)}</div>
-                    <div style="display:flex; gap:10px;">
+                    <div style="display:flex; gap:10px">
                         ${t.isAlarming ? 
-                            `<button class="stop-alarm-btn" style="display:block" onclick="stopAndPause(${t.id})">DETENER Y PAUSAR</button>` :
-                            `<button class="btn-quick" onclick="toggleResume(${t.id})">
-                                ${t.running ? 'PAUSAR' : 'REANUDAR'}
-                            </button>`
+                            `<button class="stop-btn" onclick="stopAlarm(${t.id})">DETENER ALARMA</button>` :
+                            `<button class="btn-action" onclick="toggleTimer(${t.id})">${t.running ? 'PAUSAR' : 'REANUDAR'}</button>`
                         }
                     </div>
                 </div>
@@ -138,9 +177,8 @@ let timers = JSON.parse(localStorage.getItem('pwa_timers_v5')) || [];
         }
 
         setInterval(update, 1000);
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js');
-            });
-        }
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
         render();
+    </script>
+</body>
+</html>
