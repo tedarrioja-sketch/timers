@@ -11,70 +11,49 @@
         [data-theme="dark"] { --bg: #0d0d0d; --card: #1a1a1a; --text: #e0e0e0; --border: #333333; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: system-ui, sans-serif; }
         body { background: var(--bg); color: var(--text); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        
         .header { width: 100%; max-width: 450px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .card { background: var(--card); padding: 20px; border-radius: 16px; width: 100%; max-width: 450px; margin-bottom: 15px; border: 1px solid var(--border); }
-        
-        h3 { margin-top: 0; font-weight: 600; font-size: 13px; text-transform: uppercase; opacity: 0.7; letter-spacing: 1px; }
+        h3 { margin-top: 0; font-weight: 600; font-size: 13px; text-transform: uppercase; opacity: 0.7; }
         input { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 8px; width: 100%; font-size: 16px; margin-bottom: 10px; }
-        
         .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
         .time-grid input { text-align: center; margin-bottom: 0; }
-        
         .presets-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
-        .preset-tag { background: var(--border); color: var(--text); padding: 5px 10px; border-radius: 20px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
-        .preset-tag span { cursor: pointer; font-weight: 600; }
-        .del-preset { color: var(--danger); font-weight: bold; cursor: pointer; padding: 2px 5px; }
-        
-        button { border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: transform 0.1s; }
-        button:active { transform: scale(0.95); }
+        .preset-tag { background: var(--border); color: var(--text); padding: 5px 12px; border-radius: 20px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+        .del-preset { color: var(--danger); font-weight: bold; cursor: pointer; }
+        button { border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
         .btn-main { background: var(--accent); color: white; padding: 15px; width: 100%; font-size: 16px; }
         .btn-secondary { background: var(--border); color: var(--text); padding: 8px 12px; font-size: 12px; }
-
         .timer-item { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border-left: 5px solid var(--accent); width: 100%; max-width: 450px; }
         .timer-item.alarm { border-left-color: var(--danger); animation: pulse 0.8s infinite; }
         .timer-clock { font-size: 48px; font-family: monospace; font-weight: 700; margin: 10px 0; text-align: center; color: var(--accent); }
-        .timer-item.alarm .timer-clock { color: var(--danger); }
-        
         .stop-alarm-btn { background: var(--danger); color: white; padding: 15px; width: 100%; font-size: 14px; margin-top: 10px; display: none; }
         .timer-item.alarm .stop-alarm-btn { display: block; }
-        
         @keyframes pulse { 0% { background: var(--card); } 50% { background: #ff444422; } 100% { background: var(--card); } }
     </style>
 </head>
 <body data-theme="dark">
-
     <div class="header">
         <h2 style="margin:0">PowerTimer Pro</h2>
         <button class="btn-secondary" onclick="toggleTheme()" id="theme-btn">☀️ CLARO</button>
     </div>
-
     <div class="card">
-        <h3>Nuevo Timer (Auto-Recurrente)</h3>
+        <h3>Nuevo Timer</h3>
         <input type="text" id="t-name" placeholder="Nombre (ej. Serie Gym)">
         <div class="time-grid">
-            <input type="number" id="t-h" placeholder="HH">
-            <input type="number" id="t-m" placeholder="MM">
-            <input type="number" id="t-s" placeholder="SS">
+            <input type="number" id="t-h" placeholder="HH"><input type="number" id="t-m" placeholder="MM"><input type="number" id="t-s" placeholder="SS">
         </div>
-        
-        <h3 style="margin-top:20px">Ajustes Predefinidos</h3>
+        <h3>Predefinidos</h3>
         <div id="presets-list" class="presets-container"></div>
-        
         <div style="display:flex; gap:10px;">
             <button class="btn-main" onclick="startNewTimer()">INICIAR</button>
             <button class="btn-secondary" onclick="saveAsPreset()">💾 GUARDAR</button>
         </div>
     </div>
-
     <div id="timers-list" style="width:100%; max-width:450px;"></div>
 
     <script>
-        let timers = JSON.parse(localStorage.getItem('timers_v9')) || [];
-        let presets = JSON.parse(localStorage.getItem('presets_v9')) || [
-            { name: 'Pomodoro', h: 0, m: 25, s: 0 }
-        ];
-        
+        let timers = JSON.parse(localStorage.getItem('timers_v11')) || [];
+        let presets = JSON.parse(localStorage.getItem('presets_v11')) || [{ name: 'Pomodoro', h: 0, m: 25, s: 0 }];
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function toggleTheme() {
@@ -85,47 +64,35 @@
         }
         if(localStorage.getItem('theme')) document.body.setAttribute('data-theme', localStorage.getItem('theme'));
 
-        // PRESETS
         function renderPresets() {
             const container = document.getElementById('presets-list');
             container.innerHTML = presets.map((p, i) => `
                 <div class="preset-tag">
-                    <span onclick="applyPreset(${i})">${p.name}</span>
-                    <div class="del-preset" onclick="deletePreset(${i})">×</div>
+                    <span onclick="applyPreset(${i})" style="cursor:pointer">${p.name}</span>
+                    <span class="del-preset" onclick="deletePreset(${i})">×</span>
                 </div>
             `).join('');
         }
-
         function applyPreset(i) {
             const p = presets[i];
             document.getElementById('t-name').value = p.name;
             document.getElementById('t-h').value = p.h; document.getElementById('t-m').value = p.m; document.getElementById('t-s').value = p.s;
         }
-
-        function deletePreset(i) {
-            presets.splice(i, 1);
-            localStorage.setItem('presets_v9', JSON.stringify(presets));
-            renderPresets();
-        }
-
+        function deletePreset(i) { presets.splice(i, 1); localStorage.setItem('presets_v11', JSON.stringify(presets)); renderPresets(); }
+        
         function saveAsPreset() {
             const name = document.getElementById('t-name').value || "Preset";
             const h = parseInt(document.getElementById('t-h').value || 0), m = parseInt(document.getElementById('t-m').value || 0), s = parseInt(document.getElementById('t-s').value || 0);
-            if(h+m+s > 0) {
-                presets.push({ name, h, m, s });
-                localStorage.setItem('presets_v9', JSON.stringify(presets));
-                renderPresets();
-            }
+            if(h+m+s > 0) { presets.push({ name, h, m, s }); localStorage.setItem('presets_v11', JSON.stringify(presets)); renderPresets(); }
         }
 
-        // LÓGICA
         function startNewTimer() {
             const name = document.getElementById('t-name').value || "Timer";
             const h = parseInt(document.getElementById('t-h').value || 0), m = parseInt(document.getElementById('t-m').value || 0), s = parseInt(document.getElementById('t-s').value || 0);
             const total = (h * 3600) + (m * 60) + s;
-            if(total > 0) {
-                timers.push({ id: Date.now(), name, total, remaining: total, running: true, lastUpdate: Date.now(), isAlarming: false });
-                saveAndRender();
+            if(total > 0) { 
+                timers.push({ id: Date.now(), name, total, remaining: total, running: true, lastUpdate: Date.now(), isAlarming: false }); 
+                saveAndRender(); 
             }
         }
 
@@ -139,19 +106,15 @@
         }
 
         function update() {
-            const now = Date.now();
-            let alarm = false;
+            const now = Date.now(); let alarm = false;
             timers.forEach(t => {
                 if (t.running) {
                     const d = Math.floor((now - t.lastUpdate) / 1000);
-                    if (d >= 1) {
-                        t.remaining -= d;
-                        t.lastUpdate = now;
-                        if (t.remaining <= 0) {
-                            t.remaining = t.total; // REANUDACIÓN AUTOMÁTICA INSTANTÁNEA
-                            t.isAlarming = true;
-                        }
-                        saveAndRender();
+                    if (d >= 1) { 
+                        t.remaining -= d; 
+                        t.lastUpdate = now; 
+                        if (t.remaining <= 0) { t.remaining = t.total; t.isAlarming = true; } 
+                        saveAndRender(); 
                     }
                 }
                 if (t.isAlarming) alarm = true;
@@ -159,21 +122,10 @@
             if (alarm) playSound();
         }
 
-        function stopAlarm(id) {
-            const t = timers.find(x => x.id === id);
-            if(t) { t.isAlarming = false; saveAndRender(); }
-        }
-
-        function removeTimer(id) {
-            timers = timers.filter(x => x.id !== id);
-            saveAndRender();
-        }
-
-        function saveAndRender() {
-            localStorage.setItem('timers_v9', JSON.stringify(timers));
-            renderTimers();
-        }
-
+        function stopAlarm(id) { const t = timers.find(x => x.id === id); if(t) { t.isAlarming = false; saveAndRender(); } }
+        function removeTimer(id) { timers = timers.filter(x => x.id !== id); saveAndRender(); }
+        function saveAndRender() { localStorage.setItem('timers_v11', JSON.stringify(timers)); renderTimers(); }
+        
         function format(s) {
             const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sc = s%60;
             return `${h>0?h+':':''}${m.toString().padStart(2,'0')}:${sc.toString().padStart(2,'0')}`;
@@ -183,8 +135,7 @@
             document.getElementById('timers-list').innerHTML = timers.map(t => `
                 <div class="timer-item ${t.isAlarming?'alarm':''}">
                     <div style="display:flex; justify-content:space-between;">
-                        <strong>${t.name}</strong>
-                        <span onclick="removeTimer(${t.id})" style="color:var(--danger); cursor:pointer;">✕ ELIMINAR</span>
+                        <strong>${t.name}</strong><span onclick="removeTimer(${t.id})" style="color:var(--danger); cursor:pointer;">✕</span>
                     </div>
                     <div class="timer-clock">${format(t.remaining)}</div>
                     <button class="stop-alarm-btn" onclick="stopAlarm(${t.id})">SILENCIAR ALARMA</button>
@@ -193,9 +144,15 @@
         }
 
         setInterval(update, 1000);
-        renderPresets();
-        renderTimers();
-        if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+        renderPresets(); renderTimers();
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then(reg => {
+                    console.log('SW registrado');
+                }).catch(err => console.log('Error SW', err));
+            });
+        }
     </script>
 </body>
 </html>
