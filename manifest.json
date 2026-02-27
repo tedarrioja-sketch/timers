@@ -1,16 +1,25 @@
 {
   "name": "PowerTimer Pro",
   "short_name": "PowerTimer",
+  "id": "/PowerTimer/",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0d0d0d",
   "theme_color": "#007bff",
+  "description": "Aplicación de timers múltiples responsiva",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/2503/2503206.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2503/2503206.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
